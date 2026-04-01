@@ -7,6 +7,9 @@ install:
 build:
 	./build.sh
 
+createadmin:
+	uv run python manage.py createsuperuser
+
 start:
 	uv run gunicorn task_manager.wsgi --bind 0.0.0.0:${PORT}
 
@@ -31,6 +34,6 @@ ci-migrate:
     	uv run python manage.py migrate --noinput
 
 migrate:
-	uv python manage.py migrate
+	uv run python manage.py migrate
 
 PORT ?= 8000

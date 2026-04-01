@@ -6,10 +6,11 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .filters import TaskFilter
+from django.db.models import Q
+from .forms import TaskForm
 from .models import Task
 
 # Create your views here.
-
 
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
@@ -17,12 +18,12 @@ class TaskListView(LoginRequiredMixin, ListView):
     context_object_name = 'tasks'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = Task.objects.all()
-        self.filterset = TaskFilter(
-            self.request.GET,
-            queryset=queryset,
-            request=self.request
-        )
+        if not user.is_superuser:
+            queryset = queryset.filter(Q(author=user) | Q(executor=user))
+        # фильтр только по overdue
+        self.filterset = TaskFilter(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
@@ -40,10 +41,11 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 class TaskCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Task
     template_name = 'tasks/task_form.html'
-    fields = ['name', 'description', 'status', 'executor', 'labels']
+    #fields = ['name', 'deadline', 'description', 'status', 'executor', 'labels']
     template_name = 'tasks/task_form.html'
     success_url = reverse_lazy('tasks:task_list')
     success_message = _("Задача успешно создана!")
+    form_class = TaskForm
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -53,9 +55,10 @@ class TaskCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, UpdateView):  # noqa: E501
     model = Task
     template_name = 'tasks/task_form.html'
-    fields = ['name', 'description', 'status', 'executor', 'labels']
+    #fields = ['name', 'deadline', 'description', 'status', 'executor', 'labels']
     success_url = reverse_lazy('tasks:task_list')
     success_message = _("Задача успешно изменена!")
+    form_class = TaskForm
 
     def test_func(self):
         user = self.request.user

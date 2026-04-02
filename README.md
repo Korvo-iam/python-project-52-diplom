@@ -1,7 +1,5 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/Korvo-iam/python-project-52/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/Korvo-iam/python-project-52/actions)
+### Tests and linter status:
 [![Tests](https://github.com/Korvo-iam/python-project-52/actions/workflows/my-check.yml/badge.svg)](https://github.com/Korvo-iam/python-project-52/actions/workflows/my-check.yml)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Korvo-iam_python-project-52&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Korvo-iam_python-project-52)
 
 
 Render.com :

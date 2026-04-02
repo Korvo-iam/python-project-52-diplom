@@ -2,6 +2,8 @@
 from django.db import migrations
 from django.utils import timezone
 import random
+from django.contrib.auth.hashers import make_password
+
 
 def create_seed_data(apps, schema_editor):
     User = apps.get_model('users', 'User')
@@ -32,10 +34,16 @@ def create_seed_data(apps, schema_editor):
     ]
     created_users = {}
     for u in users_data:
-        user, created = User.objects.get_or_create(username=u["username"], defaults=u)
-        if created:
-            user.set_password(u["password"])
-            user.save()
+        user, created = User.objects.get_or_create(
+            username=u["username"],
+            defaults={
+                "first_name": u.get("first_name", ""),
+                "last_name": u.get("last_name", ""),
+                "is_superuser": u.get("is_superuser", False),
+                "is_staff": u.get("is_staff", False),
+                "password": make_password(u["password"]),  # <- хешируем пароль
+            }
+        )
         created_users[u["username"]] = user
 
     admin_user = created_users["admin"]
@@ -51,12 +59,13 @@ def create_seed_data(apps, schema_editor):
                 "status": random.choice(status_objs),
                 "author": admin_user,
                 "executor": user,
-                "deadline": timezone.now() + timezone.timedelta(days=random.randint(1,10)),
+                "deadline": timezone.now() + timezone.timedelta(days=random.randint(1, 10)),
             }
         )
         if created:
-            task.labels.set(random.sample(label_objs, k=random.randint(1,3)))
+            task.labels.set(random.sample(label_objs, k=random.randint(1, 3)))
             task.save()
+
 
 class Migration(migrations.Migration):
 

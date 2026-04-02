@@ -5,7 +5,7 @@
 
 
 Render.com :
-[https://python-project-52-ver7.onrender.com](https://python-project-52-ver7.onrender.com)
+[https://python-project-52-diplom.onrender.com](https://python-project-52-diplom.onrender.com)
 
 
 ##  Project preview / Превью проекта

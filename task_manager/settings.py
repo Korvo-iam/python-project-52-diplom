@@ -45,7 +45,7 @@ ALLOWED_HOSTS = [
     "webserver", 
     "127.0.0.1", 
     "localhost", 
-    "python-project-52-ver7.onrender.com"]
+    "python-project-52-diplom.onrender.com"]
 
 
 # Application definition

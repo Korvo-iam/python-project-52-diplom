@@ -1,5 +1,5 @@
 ### Tests and linter status:
-[![Tests](https://github.com/Korvo-iam/python-project-52/actions/workflows/my-check.yml/badge.svg)](https://github.com/Korvo-iam/python-project-52/actions/workflows/my-check.yml)
+[![Tests](https://github.com/Korvo-iam/python-project-52-diplom/actions/workflows/my-check.yml/badge.svg)](https://github.com/Korvo-iam/python-project-52-diplom/actions/workflows/my-check.yml)
 
 
 Render.com :

@@ -19,52 +19,54 @@ class Command(BaseCommand):
         ]
 
         created_users = {}
-
         for u in users_data:
             user, created = User.objects.get_or_create(username=u["username"])
-            if created:
-                user.first_name = u["first_name"]
-                user.last_name = u["last_name"]
-                if u.get("is_superuser"):
-                    user.is_superuser = True
-                    user.is_staff = True
-                user.set_password(u["password"])
-                user.save()
-                self.stdout.write(f"Created user {u['username']}/{u['password']}")
+            user.first_name = u["first_name"]
+            user.last_name = u["last_name"]
+            if u.get("is_superuser"):
+                user.is_superuser = True
+                user.is_staff = True
+            user.set_password(u["password"])
+            user.save()
             created_users[u["username"]] = user
+            self.stdout.write(f"Ensured user {u['username']} exists")
 
         admin_user = created_users["admin"]
 
         # -------------------- STATUSES --------------------
         status_names = ["Новая", "В процессе", "Завершена"]
         statuses = []
-        for s in status_names:
-            status, _ = Status.objects.get_or_create(name=s)
+        for name in status_names:
+            status, _ = Status.objects.get_or_create(name=name)
             statuses.append(status)
-        self.stdout.write("Created statuses")
+        self.stdout.write("Ensured statuses exist")
 
         # -------------------- LABELS --------------------
         label_names = ["важно", "желательно", "Umbrella", "SpaceX"]
         labels = []
-        for l in label_names:
-            label, _ = Label.objects.get_or_create(name=l)
+        for name in label_names:
+            label, _ = Label.objects.get_or_create(name=name)
             labels.append(label)
-        self.stdout.write("Created labels")
+        self.stdout.write("Ensured labels exist")
 
         # -------------------- TASKS --------------------
         for username, user in created_users.items():
             if username == "admin":
                 continue  # не создаем задачи для админа
             task_name = f"Задача для {username}"
-            if not Task.objects.filter(name=task_name).exists():
-                task = Task.objects.create(
-                    name=task_name,
-                    description=f"Это пример задачи для {username}",
-                    status=random.choice(statuses),
-                    author=admin_user,
-                    executor=user,
-                    deadline=timezone.now() + timezone.timedelta(days=random.randint(1, 10))
-                )
-                task.labels.set(random.sample(labels, k=random.randint(1, 3)))
-                task.save()
-                self.stdout.write(f"Created task for {username}")
+            task, created = Task.objects.get_or_create(
+                name=task_name,
+                defaults={
+                    "description": f"Это пример задачи для {username}",
+                    "status": random.choice(statuses),
+                    "author": admin_user,
+                    "executor": user,
+                    "deadline": timezone.now() + timezone.timedelta(days=random.randint(1, 10))
+                }
+            )
+            # Добавляем случайные метки (1-3 на задачу)
+            task.labels.set(random.sample(labels, k=random.randint(1, 3)))
+            task.save()
+            self.stdout.write(f"Ensured task exists for {username}")
+
+            

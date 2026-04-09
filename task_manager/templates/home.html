@@ -1,13 +1,83 @@
 <!--http://127.0.0.1:8000/-->
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Главная{% endblock %}
 
 {% block content %}
-<h1>Добро пожаловать в менеджер задач!</h1>
-<p class="lead">
-  Сканируйте QR-код, чтобы перейти на мой <a href="https://github.com/Korvo-iam" target="_blank">GitHub</a>:
-</p>
-<img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https://github.com/Korvo-iam&&color=13-110-253&bgcolor=33-37-41" alt="QR GitHub">
+
+<div class="container">
+    <div class="text-center mt-5 mb-5">
+        <h1 class="display-4 fw-bold">Менеджер задач</h1>
+        <p class="lead text-secondary">
+            Без корпораций. Без слежки. Без мусора.
+        </p>
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <a href="{% url 'tasks:task_list' %}" class="btn btn-primary btn-lg">
+                Начать
+            </a>
+            <a href="https://github.com/Korvo-iam" target="_blank" class="btn btn-outline-light btn-lg">
+                GitHub
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center mb-5">
+        <p class="fs-5">
+            Это не очередной SaaS.
+        </p>
+        <p class="text-secondary">
+            Открытый код, полный контроль над данными и никакого скрытого поведения.
+        </p>
+    </div>
+
+    <div class="mb-5">
+        <h3 class="mb-4 text-center">Почему мы лучше?</h3>
+        
+        <div class="mb-3">
+            <h3>🔐 Приватность</h3>
+            <div class="progress">
+                <div class="progress-bar bg-success"
+                     style="width: 100%">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <h3>⚡ Простота</h3>
+            <div class="progress">
+                <div class="progress-bar bg-primary"
+                     style="width: 100%">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <h3>🔓 Прозрачность</h3>
+            <div class="progress">
+                <div class="progress-bar bg-warning"
+                     style="width: 100%">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <h3>🏢 Независимость от корпораций</h3>
+            <div class="progress">
+                <div class="progress-bar bg-danger"
+                     style="width: 100%">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <p class="fw-bold">
+            Ваши задачи — ваши данные.
+        </p>
+        <p class="text-secondary">
+            Никакой аналитики, никакой телеметрии, никаких скрытых API.
+        </p>
+    </div>
+</div>
 
 {% endblock %}

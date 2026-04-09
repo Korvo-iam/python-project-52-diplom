@@ -4,20 +4,31 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
 
+{% block title %}
+    {% if form.instance.pk %}
+        Изменить пользователя
+    {% else %}
+        Регистрация
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-<div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column justify-content-center">
-    <main class="px-3 text-center">
-        <h1>
+<div class="container py-5 d-flex justify-content-center">
+
+    <div class="card-custom p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+
+        <h1 class="mb-4">
             {% if form.instance.pk %}
                 Изменить пользователя
             {% else %}
                 Регистрация
             {% endif %}
         </h1>
-        <form method="post" class="text-start mx-auto p-4 border rounded shadow-sm bg-dark" style="max-width: 400px;">
+
+        <form method="post">
             {% csrf_token %}
-            {% bootstrap_form form layout='vertical' %}
-            <button type="submit" class="btn btn-primary mt-3 w-100">
+            {% bootstrap_form form layout='vertical' label_class="form-label text-start" field_class="form-control" %}
+            <button type="submit" class="btn btn-primary w-100 mt-3">
                 {% if form.instance.pk %}
                     Изменить
                 {% else %}
@@ -25,6 +36,22 @@
                 {% endif %}
             </button>
         </form>
-    </main>
+
+    </div>
 </div>
+
+<style>
+.card-custom {
+    background-color: #1f2937;
+    border-radius: 12px;
+}
+.form-text {
+    color: #d1d5db;
+}
+
+.is-invalid + .invalid-feedback,
+.invalid-feedback {
+    color: #f87171;
+}
+</style>
 {% endblock %}

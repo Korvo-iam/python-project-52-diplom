@@ -5,13 +5,25 @@
 {% block title %}Удаление статуса{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-    <h1>Удаление статуса</h1>
-    <p>Вы уверены, что хотите удалить статус "{{ object.name }}"?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Да, удалить</button>
-        <a href="{% url 'statuses:list' %}" class="btn btn-secondary">Отмена</a>
-    </form>
+<div class="container py-5 d-flex justify-content-center">
+
+    <div class="card-custom p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+        <h1 class="mb-3">Удаление статуса</h1>
+        <p>Вы уверены, что хотите удалить статус "{{ object.name }}"?</p>
+
+        <form method="post" class="d-flex flex-column gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger w-100">Да, удалить</button>
+            <a href="{% url 'statuses:list' %}" class="btn btn-secondary w-100">Отмена</a>
+        </form>
+
+    </div>
 </div>
+
+<style>
+.card-custom {
+    background-color: #1f2937;
+    border-radius: 12px;
+}
+</style>
 {% endblock %}

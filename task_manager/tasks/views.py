@@ -23,7 +23,7 @@ class TaskListView(LoginRequiredMixin, ListView):
         if not user.is_superuser:
             queryset = queryset.filter(Q(author=user) | Q(executor=user))
         # фильтр только по overdue
-        self.filterset = TaskFilter(self.request.GET, queryset=queryset)
+        self.filterset = TaskFilter(self.request.GET, queryset=queryset, request=self.request)
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):

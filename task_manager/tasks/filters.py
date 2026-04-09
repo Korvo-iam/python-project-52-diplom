@@ -30,7 +30,6 @@ class TaskFilter(django_filters.FilterSet):
     )
 
     ASSIGNED_CHOICES = (
-        ('all', 'Все'),
         ('to_me', 'Назначенные мне'),
         ('by_me', 'Назначенные мной'),
     )
@@ -40,7 +39,7 @@ class TaskFilter(django_filters.FilterSet):
         method='filter_assigned_tasks',
         label='Назначение',
         empty_label=None,
-        widget=forms.RadioSelect(attrs={'class': 'form-check-inline'})   # вот радиокнопки
+        widget=forms.RadioSelect(attrs={'class': 'form-check-inline'})
     )
 
     class Meta:

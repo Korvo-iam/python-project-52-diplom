@@ -2,101 +2,124 @@
 
 {% extends "base.html" %}
 
-
-
 {% block title %}Список задач{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Список задач</h1>
-        <form action="{% url 'tasks:task_create' %}" method="get" style="display:inline;">
-            <button type="submit" class="btn btn-primary">
-                Создать задачу
-            </button>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Список задач</h1>
+        <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">
+            + Создать задачу
+        </a>
+    </div>
+
+    <div class="card-custom mb-4">
+        <h5 class="mb-3">Фильтры</h5>
+        <form method="get">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    {{ filter.form.status.label_tag }}
+                    {{ filter.form.status }}
+                </div>
+
+                <div class="col-md-4">
+                    {{ filter.form.executor.label_tag }}
+                    {{ filter.form.executor }}
+                </div>
+
+                <div class="col-md-4">
+                    {{ filter.form.labels.label_tag }}
+                    {{ filter.form.labels }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {% for radio in filter.form.assigned %}
+                    <div class="form-check form-check-inline">
+                        {{ radio.tag }}
+                        <label class="form-check-label" for="{{ radio.id_for_label }}">
+                            {{ radio.choice_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                <button type="submit" class="btn btn-primary">
+                    Применить
+                </button>
+                <a href="{% url 'tasks:task_list' %}" class="btn btn-outline-light">
+                    Сброс
+                </a>
+                <button type="submit" name="overdue" value="true" class="btn btn-outline-warning">
+                    Просроченные
+                </button>
+            </div>
+
         </form>
     </div>
 
-    <form method="get" class="mb-4 border p-3 rounded shadow-sm">
-        <h4 class="mb-3">Фильтры</h4>
-        <div class="d-flex justify-content-between mb-3 flex-wrap">
-            <div class="col-md-3">
-                {{ filter.form.status.label_tag }}
-                {{ filter.form.status }}
-            </div>
-            <div class="col-md-3">
-                {{ filter.form.executor.label_tag }}
-                {{ filter.form.executor }}
-            </div>
-            <div class="col-md-3">
-                {{ filter.form.labels.label_tag }}
-                {{ filter.form.labels }}
-            </div>
-        </div>
+    <div class="card-custom p-0 overflow-hidden">
+        <table class="table table-dark table-hover mb-0 align-middle">
+            <thead>
+                <tr class="text-secondary">
+                    <th>Имя</th>
+                    <th>Дедлайн</th>
+                    <th>Статус</th>
+                    <th>Автор</th>
+                    <th>Исполнитель</th>
+                    <th>Дата</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
 
-        <div class="d-flex justify-content-center mb-3">
-            {% for radio in filter.form.assigned %}
-                <div class="form-check me-3">
-                    <label class="form-check-label" for="{{ radio.id_for_label }}">
-                        {{ radio.tag }} {{ radio.choice_label }}
-                    </label>
-                </div>
-            {% endfor %}
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">
-            Применить фильтры
-        </button>
-        <a href="{% url 'tasks:task_list' %}" class="btn btn-secondary mt-3">
-            Показать все
-        </a>
-        <button type="submit" name="overdue" value="true" class="btn btn-secondary mt-3">
-            Показать просроченные
-        </button>
-    </form>
-
-    <table class="table table-dark table-striped table-hover">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Имя</th>
-                <th>Статус</th>
-                <th>Автор</th>
-                <th>Исполнитель</th>
-                <th>Дата создания</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for task in tasks %}
-            <tr>
-                <td>{{ task.id }}</td>
-                <td>
-                    <a href="{% url 'tasks:task_detail' task.pk %}">
-                        {{ task.name }}
-                    </a>
-                </td>
-                <td>{{ task.status.name }}</td>
-                <td>{{ task.author }}</td>
-                <td>{{ task.executor|default:"—" }}</td>
-                <td>{{ task.created_at|date:"d.m.Y H:i" }}</td>
-                <td>
-                    <a href="{% url 'tasks:task_update' task.pk %}"
-                       class="btn btn-sm btn-warning">
-                        Изменить
-                    </a>
-                        <a href="{% url 'tasks:task_delete' task.pk %}"
-                           class="btn btn-sm btn-danger">
-                            Удалить
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tasks:task_detail' task.pk %}"
+                           class="text-decoration-none text-white fw-semibold">
+                            {{ task.name }}
                         </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">Задач пока нет.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                    <td>
+                        {{ task.deadline|date:"d.m.Y" }}
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">
+                            {{ task.status.name }}
+                        </span>
+                    </td>
+                    <td class="text-secondary">
+                        {{ task.author }}
+                    </td>
+                    <td>
+                        {{ task.executor|default:"—" }}
+                    </td>
+                    <td class="text-secondary">
+                        {{ task.created_at|date:"d.m.Y" }}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'tasks:task_update' task.pk %}"
+                           class="btn btn-sm btn-outline-light">
+                            ✏ Редактировать
+                        </a>
+                        <a href="{% url 'tasks:task_delete' task.pk %}"
+                           class="btn btn-sm btn-outline-danger">
+                            🗑 Удалить
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-secondary py-4">
+                        Задач пока нет
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

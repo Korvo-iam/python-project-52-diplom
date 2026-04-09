@@ -7,42 +7,63 @@
 {% block content %}
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Список пользователей</h1>
-        <a href="{% url 'users:user_create' %}" class="btn btn-primary">Создать нового</a>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+        <h1 class="mb-2">Список пользователей</h1>
+        <a href="{% url 'users:user_create' %}" class="btn btn-primary mb-2">+ Создать нового</a>
     </div>
 
-    <table class="table table-dark table-striped table-hover">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Имя пользователя</th>
-                <th>Полное имя</th>
-                <th>Дата создания</th>
-                {% if request.user.is_authenticated %}
-                    <th>Действия</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.get_full_name }}</td>
-                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
-                <td>
-                    {% if request.user.is_authenticated and request.user == user or request.user.is_superuser %}
-                        <a href="{% url 'users:user_update' user.pk %}" class="btn btn-sm btn-warning">Изменить</a>
-                        <a href="{% url 'users:user_delete' user.pk %}" class="btn btn-sm btn-danger">Удалить</a>
-                    {% else %}
-                        <p>У вас нет доступа</p>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card-custom p-0 overflow-hidden shadow-sm">
 
+        <table class="table table-dark table-hover mb-0 align-middle">
+            <thead>
+                <tr class="text-secondary">
+                    <th>ID</th>
+                    <th>Имя пользователя</th>
+                    <th>Полное имя</th>
+                    <th>Дата создания</th>
+                    {% if request.user.is_authenticated %}
+                        <th>Действия</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name }}</td>
+                    <td class="text-secondary">{{ user.date_joined|date:"d.m.Y" }}</td>
+                    {% if request.user.is_authenticated %}
+                    <td class="text-center">
+                        {% if request.user == user or request.user.is_superuser %}
+                            <a href="{% url 'users:user_update' user.pk %}" class="btn btn-sm btn-outline-light">✏ Редактировать</a>
+                            <a href="{% url 'users:user_delete' user.pk %}" class="btn btn-sm btn-outline-danger">🗑 Удалить</a>
+                        {% else %}
+                            <span class="text-secondary">Нет доступа</span>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-secondary py-4">
+                        Пользователей пока нет
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
 </div>
+
+<style>
+.card-custom {
+    background-color: #1f2937;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+}
+
+</style>
 {% endblock %}

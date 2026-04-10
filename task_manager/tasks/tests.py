@@ -1,117 +1,154 @@
+import uuid
 from django.test import TestCase
 from django.urls import reverse
-from .models import Task
-from task_manager.statuses.models import Status
 from django.contrib.messages import get_messages
 from django.contrib.auth import get_user_model
+
+from .models import Task
+from task_manager.statuses.models import Status
+
 User = get_user_model()
-# Create your tests here.
 
 
 class TaskCRUDTest(TestCase):
 
-    def setUp(self):  # создание суперпользователя
-        self.admin = User.objects.create_superuser(username='admin', email='admin@test.com', password='pass')  # noqa: E501
-        self.client.login(username='admin', password='pass')
-        self.status = Status.objects.create(name='Новый')  # создаём статус для задач  # noqa: E501
+    def setUp(self):
+        self.admin = User.objects.create_superuser(
+            username=f'admin_{uuid.uuid4().hex[:8]}',
+            email='admin@test.com',
+            password='pass'
+        )
+        self.client.force_login(self.admin)
 
-    def test_create_task_message(self):  # проверка flash успешного создания
+        self.status = Status.objects.create(
+            name=f'status_{uuid.uuid4().hex[:8]}'
+        )
+
+        self.user = User.objects.create_user(
+            username=f'user_{uuid.uuid4().hex[:8]}',
+            password='pass'
+        )
+
+    def test_create_task_message(self):
+        name = f'task_{uuid.uuid4().hex[:8]}'
+
         response = self.client.post(reverse('tasks:task_create'), {
-            'name': 'Flash задача',
+            'name': name,
             'description': 'Описание тестовой задачи',
             'status': self.status.id,
-            'executor': self.admin.id,
+            'executor': self.user.id,
         }, follow=True)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Задача успешно создана!" in str(m) for m in messages))
-        self.assertRedirects(response, reverse('tasks:task_list'))
 
-    def test_update_task_message(self):  # проверка flash успешного изменения
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("Задача успешно создана!" in str(m) for m in messages))
+        self.assertTrue(Task.objects.filter(name=name).exists())
+
+    def test_update_task_message(self):
         task = Task.objects.create(
-            name='Старая задача',
+            name=f'task_{uuid.uuid4().hex[:8]}',
             description='Описание',
             status=self.status,
-            author=self.admin
+            author=self.admin,
+            executor=self.user
         )
-        response = self.client.post(
-            reverse(
-                'tasks:task_update', args=[task.id]),
-        {
-            'name': 'Новая задача',
-            'description': 'Новое описание',
-            'status': self.status.id,
-            'executor': self.admin.id,
-        }, follow=True)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Задача успешно изменена!" in str(m) for m in messages))
 
-    def test_delete_task_message(self):  # проверка flash успешного удаления
+        new_name = f'task_{uuid.uuid4().hex[:8]}'
+
+        response = self.client.post(
+            reverse('tasks:task_update', args=[task.id]),
+            {
+                'name': new_name,
+                'description': 'Новое описание',
+                'status': self.status.id,
+                'executor': self.user.id,
+            },
+            follow=True
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("Задача успешно изменена!" in str(m) for m in messages))
+
+        task.refresh_from_db()
+        self.assertEqual(task.name, new_name)
+
+    def test_delete_task_message(self):
         task = Task.objects.create(
-            name='Удаляемая задача',
+            name=f'task_{uuid.uuid4().hex[:8]}',
             description='Описание',
             status=self.status,
-            author=self.admin
+            author=self.admin,
+            executor=self.user
         )
-        response = self.client.post(
-            reverse(
-                'tasks:task_delete',
-                args=[task.id]),
-                follow=True)
-        messages = list(get_messages(response.wsgi_request))
-        self.assertTrue(
-            any(
-                "Задача успешно удалена!" in str(m) for m in messages))
 
-    def test_create_task(self):  # проверка создания задачи
-        response = self.client.post(reverse('tasks:task_create'),
-        {
-            'name': 'Тестовая задача',
+        response = self.client.post(
+            reverse('tasks:task_delete', args=[task.id]),
+            follow=True
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertTrue(any("Задача успешно удалена!" in str(m) for m in messages))
+
+        self.assertFalse(Task.objects.filter(id=task.id).exists())
+
+    def test_create_task(self):
+        name = f'task_{uuid.uuid4().hex[:8]}'
+
+        response = self.client.post(reverse('tasks:task_create'), {
+            'name': name,
             'description': 'Описание',
             'status': self.status.id,
-            'executor': self.admin.id,
+            'executor': self.user.id,
         })
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(Task.objects.filter(name='Тестовая задача').exists())
 
-    def test_update_task(self):  # проверка изменения задачи
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Task.objects.filter(name=name).exists())
+
+    def test_update_task(self):
         task = Task.objects.create(
-            name='Старая задача',
+            name=f'task_{uuid.uuid4().hex[:8]}',
             description='Описание',
             status=self.status,
-            author=self.admin
+            author=self.admin,
+            executor=self.user
         )
+
+        new_name = f'task_{uuid.uuid4().hex[:8]}'
+
         response = self.client.post(
-            reverse(
-                'tasks:task_update', args=[task.id]),
-        {
-            'name': 'Измененная задача',
-            'description': 'Новое описание',
-            'status': self.status.id,
-            'executor': self.admin.id,
-        })
+            reverse('tasks:task_update', args=[task.id]),
+            {
+                'name': new_name,
+                'description': 'Новое описание',
+                'status': self.status.id,
+                'executor': self.user.id,
+            }
+        )
+
         self.assertEqual(response.status_code, 302)
+
         task.refresh_from_db()
-        self.assertEqual(task.name, 'Измененная задача')
+        self.assertEqual(task.name, new_name)
         self.assertEqual(task.description, 'Новое описание')
 
-    def test_delete_task(self):  # проверка удаления задачи
+    def test_delete_task(self):
         task = Task.objects.create(
-            name='Удаляемая задача',
+            name=f'task_{uuid.uuid4().hex[:8]}',
             description='Описание',
             status=self.status,
-            author=self.admin
+            author=self.admin,
+            executor=self.user
         )
-        response = self.client.post(
-            reverse(
-                'tasks:task_delete', args=[task.id]))
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(Task.objects.filter(name='Удаляемая задача').exists())
 
-    def test_access_requires_login(self):  # проверка на безуспешность просмотра списка пользователей неавторизованным пользователем  # noqa: E501
+        response = self.client.post(
+            reverse('tasks:task_delete', args=[task.id])
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Task.objects.filter(id=task.id).exists())
+
+    def test_access_requires_login(self):
         self.client.logout()
+
         response = self.client.get(reverse('tasks:task_list'))
+
         self.assertRedirects(response, '/login/?next=/tasks/')
